@@ -90,29 +90,37 @@ function App() {
       return;
     }
 
-    const totalDaysInMonth = 30; // Assuming 30 days per month for simplicity
+    const monthlyPaymentNum = parseFloat(monthlyPayment);
+    const absentDaysNum = parseInt(absentDays) || 0;
+    const advanceTakenNum = parseFloat(advanceTaken) || 0;
+    const previousBalanceNum = parseFloat(previousBalance) || 0;
+
+    // Calculate days in the payment period
+    const millisecondsPerDay = 24 * 60 * 60 * 1000;
+    const totalDays = Math.round((paymentDateObj - joinDateObj) / millisecondsPerDay) + 1;
 
     // Calculate days worked
-    const daysWorked = Math.max(0, Math.floor((paymentDateObj - joinDateObj) / (1000 * 60 * 60 * 24)) + 1 - absentDays);
+    const daysWorked = Math.max(0, totalDays - absentDaysNum);
 
     // Calculate gross payment
-    const grossPayment = (daysWorked / totalDaysInMonth) * parseFloat(monthlyPayment);
+    const grossPayment = (daysWorked / totalDays) * monthlyPaymentNum;
 
-    // Add previous balance to gross payment
-    const totalPaymentDue = grossPayment + parseFloat(previousBalance);
+    // Calculate total payment due
+    const totalPaymentDue = grossPayment + previousBalanceNum;
 
     // Calculate net payment after deducting advances
-    const netPayment = totalPaymentDue - parseFloat(advanceTaken);
+    const netPayment = totalPaymentDue - advanceTakenNum;
 
     // Determine if there's any balance carried forward
     const balanceCarriedForward = netPayment < 0 ? Math.abs(netPayment) : 0;
+    const finalPayment = Math.max(0, netPayment);
 
     setPaymentSummary({
       name: employeeName,
-      totalDue: isNaN(totalPaymentDue) ? 0 : totalPaymentDue,
-      advanceDeducted: isNaN(parseFloat(advanceTaken)) ? 0 : parseFloat(advanceTaken),
-      finalPayment: isNaN(netPayment) ? 0 : Math.max(0, netPayment),
-      balanceCarriedForward: isNaN(balanceCarriedForward) ? 0 : balanceCarriedForward
+      totalDue: totalPaymentDue,
+      advanceDeducted: advanceTakenNum,
+      finalPayment: finalPayment,
+      balanceCarriedForward: balanceCarriedForward
     });
     setShowSummary(true);
   };
