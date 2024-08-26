@@ -3,11 +3,16 @@ import './App.css';
 
 function InputField({ label, id, type, value, onChange, placeholder, step, min }) {
   return (
-    <div className="input-group">
-      <label htmlFor={id}>{label}</label>
+    <div>
+      <label htmlFor={id} className="block text-sm font-medium text-gray-700">
+        {label}
+      </label>
       <input
         id={id}
+        name={id}
         type={type}
+        required
+        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
         value={value}
         onChange={onChange}
         placeholder={placeholder}
@@ -27,7 +32,6 @@ function App() {
   const [advanceTaken, setAdvanceTaken] = useState('');
   const [previousBalance, setPreviousBalance] = useState('');
   const [paymentSummary, setPaymentSummary] = useState(null);
-  const [showSummary, setShowSummary] = useState(false);
 
   const handleCalculatePayment = () => {
     const monthlyPaymentNum = parseFloat(monthlyPayment);
@@ -74,7 +78,32 @@ function App() {
       finalPayment: isNaN(netPayment) ? 0 : Math.max(0, netPayment),
       balanceCarriedForward: isNaN(balanceCarriedForward) ? 0 : balanceCarriedForward
     });
-    setShowSummary(true);
+
+    // Open new window with results
+    const resultWindow = window.open('', '_blank');
+    resultWindow.document.write(`
+      <html>
+        <head>
+          <title>Payment Summary</title>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; padding: 20px; }
+            h1 { color: #b05a4e; }
+            .summary { background-color: #f4f4f4; padding: 20px; border-radius: 5px; }
+          </style>
+        </head>
+        <body>
+          <h1>Payment Summary</h1>
+          <div class="summary">
+            <p><strong>Employee Name:</strong> ${employeeName}</p>
+            <p><strong>Total Payment Due:</strong> $${totalPaymentDue.toFixed(2)}</p>
+            <p><strong>Advance Deducted:</strong> $${advanceTakenNum.toFixed(2)}</p>
+            <p><strong>Final Payment:</strong> $${Math.max(0, netPayment).toFixed(2)}</p>
+            <p><strong>Balance Carried Forward:</strong> $${balanceCarriedForward.toFixed(2)}</p>
+          </div>
+        </body>
+      </html>
+    `);
+    resultWindow.document.close();
   };
 
   return (
@@ -100,16 +129,6 @@ function App() {
           </div>
         </form>
       </div>
-      {showSummary && paymentSummary && (
-        <div className="payment-summary">
-          <h1>Payment Summary</h1>
-          <p>Employee Name: {paymentSummary.name}</p>
-          <p>Total Payment Due: ${paymentSummary.totalDue.toFixed(2)}</p>
-          <p>Advance Deducted: ${paymentSummary.advanceDeducted.toFixed(2)}</p>
-          <p>Final Payment: ${paymentSummary.finalPayment.toFixed(2)}</p>
-          <p>Balance Carried Forward: ${paymentSummary.balanceCarriedForward.toFixed(2)}</p>
-        </div>
-      )}
     </div>
   );
 }
