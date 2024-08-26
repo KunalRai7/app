@@ -1,62 +1,19 @@
 import React, { useState } from 'react';
-import './index.css'; // Make sure Tailwind CSS is imported
+import './App.css';
 
-function InputField({ label, id, type, value, onChange, placeholder }) {
+function InputField({ label, id, type, value, onChange, placeholder, step, min }) {
   return (
-    <div>
-      <label htmlFor={id} className="block text-sm font-medium text-gray-700">
-        {label}
-      </label>
-      <div className="mt-1">
-        <input
-          id={id}
-          name={id}
-          type={type}
-          required
-          className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-          placeholder={placeholder}
-          value={value}
-          onChange={onChange}
-          onClick={(e) => e.target.value = ''}
-        />
-      </div>
-    </div>
-  );
-}
-
-function PaymentSummary({ name, totalDue, advanceDeducted, finalPayment, balanceCarriedForward, onReset }) {
-  return (
-    <div className="bg-white shadow overflow-hidden sm:rounded-lg">
-      <div className="px-4 py-5 sm:px-6">
-        <h3 className="text-lg leading-6 font-medium text-gray-900">Payment Summary for {name}</h3>
-      </div>
-      <div className="border-t border-gray-200">
-        <dl>
-          <SummaryItem label="Total Payment Due" value={`₹ ${totalDue.toFixed(2)}`} />
-          <SummaryItem label="Advance Deducted" value={`-₹ ${advanceDeducted.toFixed(2)}`} isNegative />
-          <SummaryItem label="Final Payment" value={`₹ ${finalPayment.toFixed(2)}`} highlight />
-          {balanceCarriedForward > 0 && (
-            <SummaryItem label="Balance Carried Forward" value={`₹ ${balanceCarriedForward.toFixed(2)}`} isNegative />
-          )}
-        </dl>
-      </div>
-      <div className="px-4 py-3 bg-gray-50 text-right sm:px-6">
-        <button
-          onClick={onReset}
-          className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-        >
-          « Calculate Another Payment
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function SummaryItem({ label, value, isNegative, highlight }) {
-  return (
-    <div className={`px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 ${highlight ? 'bg-gray-50' : ''}`}>
-      <dt className="text-sm font-medium text-gray-500">{label}</dt>
-      <dd className={`mt-1 text-sm ${isNegative ? 'text-red-600' : 'text-gray-900'} font-semibold sm:mt-0 sm:col-span-2`}>{value}</dd>
+    <div className="input-group">
+      <label htmlFor={id}>{label}</label>
+      <input
+        id={id}
+        type={type}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        step={step}
+        min={min}
+      />
     </div>
   );
 }
@@ -69,13 +26,18 @@ function App() {
   const [absentDays, setAbsentDays] = useState('');
   const [advanceTaken, setAdvanceTaken] = useState('');
   const [previousBalance, setPreviousBalance] = useState('');
-  const [showSummary, setShowSummary] = useState(false);
   const [paymentSummary, setPaymentSummary] = useState(null);
+  const [showSummary, setShowSummary] = useState(false);
 
   const handleCalculatePayment = () => {
+    const monthlyPaymentNum = parseFloat(monthlyPayment);
+    const absentDaysNum = parseInt(absentDays) || 0;
+    const advanceTakenNum = parseFloat(advanceTaken) || 0;
+    const previousBalanceNum = parseFloat(previousBalance) || 0;
+
     // Input validation
-    if (!employeeName || !monthlyPayment || !joinDate || !paymentDate) {
-      alert("Please fill in all required fields.");
+    if (!employeeName || isNaN(monthlyPaymentNum) || !joinDate || !paymentDate) {
+      alert("Please fill in all required fields with valid values.");
       return;
     }
 
@@ -91,71 +53,42 @@ function App() {
     const totalDaysInMonth = 30; // Assuming 30 days per month for simplicity
 
     // Calculate days worked
-    const daysWorked = Math.max(0, Math.floor((paymentDateObj - joinDateObj) / (1000 * 60 * 60 * 24)) + 1 - absentDays);
+    const daysWorked = Math.max(0, Math.floor((paymentDateObj - joinDateObj) / (1000 * 60 * 60 * 24)) + 1 - absentDaysNum);
 
     // Calculate gross payment
-    const grossPayment = (daysWorked / totalDaysInMonth) * parseFloat(monthlyPayment);
+    const grossPayment = (daysWorked / totalDaysInMonth) * monthlyPaymentNum;
 
     // Add previous balance to gross payment
-    const totalPaymentDue = grossPayment + parseFloat(previousBalance);
+    const totalPaymentDue = grossPayment + previousBalanceNum;
 
     // Calculate net payment after deducting advances
-    const netPayment = totalPaymentDue - parseFloat(advanceTaken);
+    const netPayment = totalPaymentDue - advanceTakenNum;
 
     // Determine if there's any balance carried forward
     const balanceCarriedForward = netPayment < 0 ? Math.abs(netPayment) : 0;
 
     setPaymentSummary({
       name: employeeName,
-      totalDue: totalPaymentDue,
-      advanceDeducted: parseFloat(advanceTaken),
-      finalPayment: Math.max(0, netPayment),
-      balanceCarriedForward: balanceCarriedForward
+      totalDue: isNaN(totalPaymentDue) ? 0 : totalPaymentDue,
+      advanceDeducted: isNaN(advanceTakenNum) ? 0 : advanceTakenNum,
+      finalPayment: isNaN(netPayment) ? 0 : Math.max(0, netPayment),
+      balanceCarriedForward: isNaN(balanceCarriedForward) ? 0 : balanceCarriedForward
     });
     setShowSummary(true);
   };
 
-  const resetCalculator = () => {
-    setEmployeeName('');
-    setMonthlyPayment('');
-    setJoinDate('');
-    setPaymentDate('');
-    setAbsentDays('');
-    setAdvanceTaken('');
-    setPreviousBalance('');
-    setShowSummary(false);
-    setPaymentSummary(null);
-  };
-
-  if (showSummary && paymentSummary) {
-    return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-lg w-full">
-          <PaymentSummary {...paymentSummary} onReset={resetCalculator} />
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow-md">
-        <div className="flex items-center justify-center space-x-2">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-gray-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-          </svg>
-          <h2 className="text-2xl font-bold text-gray-900 font-inter whitespace-nowrap">
-            Employee Payment Calculator
-          </h2>
-        </div>
+    <div className="App">
+      <div className="calculator">
+        <h1>Employee Payment Calculator</h1>
         <form className="mt-8 space-y-6">
           <InputField label="Employee Name" id="employeeName" type="text" value={employeeName} onChange={(e) => setEmployeeName(e.target.value)} placeholder="Enter employee name" />
-          <InputField label="Monthly Payment" id="monthlyPayment" type="number" value={monthlyPayment} onChange={(e) => setMonthlyPayment(e.target.value)} placeholder="Enter monthly payment" />
+          <InputField label="Monthly Payment" id="monthlyPayment" type="number" value={monthlyPayment} onChange={(e) => setMonthlyPayment(e.target.value)} placeholder="Enter monthly payment" step="0.01" min="0" />
           <InputField label="Join Date" id="joinDate" type="date" value={joinDate} onChange={(e) => setJoinDate(e.target.value)} />
           <InputField label="Payment Date" id="paymentDate" type="date" value={paymentDate} onChange={(e) => setPaymentDate(e.target.value)} />
-          <InputField label="Absent Days" id="absentDays" type="number" value={absentDays} onChange={(e) => setAbsentDays(e.target.value)} />
-          <InputField label="Advance Taken" id="advanceTaken" type="number" value={advanceTaken} onChange={(e) => setAdvanceTaken(e.target.value)} />
-          <InputField label="Previous Balance" id="previousBalance" type="number" value={previousBalance} onChange={(e) => setPreviousBalance(e.target.value)} />
+          <InputField label="Absent Days" id="absentDays" type="number" value={absentDays} onChange={(e) => setAbsentDays(e.target.value)} step="1" min="0" />
+          <InputField label="Advance Taken" id="advanceTaken" type="number" value={advanceTaken} onChange={(e) => setAdvanceTaken(e.target.value)} step="0.01" min="0" />
+          <InputField label="Previous Balance" id="previousBalance" type="number" value={previousBalance} onChange={(e) => setPreviousBalance(e.target.value)} step="0.01" />
           <div>
             <button
               type="button"
@@ -167,6 +100,16 @@ function App() {
           </div>
         </form>
       </div>
+      {showSummary && paymentSummary && (
+        <div className="payment-summary">
+          <h1>Payment Summary</h1>
+          <p>Employee Name: {paymentSummary.name}</p>
+          <p>Total Payment Due: ${paymentSummary.totalDue.toFixed(2)}</p>
+          <p>Advance Deducted: ${paymentSummary.advanceDeducted.toFixed(2)}</p>
+          <p>Final Payment: ${paymentSummary.finalPayment.toFixed(2)}</p>
+          <p>Balance Carried Forward: ${paymentSummary.balanceCarriedForward.toFixed(2)}</p>
+        </div>
+      )}
     </div>
   );
 }
