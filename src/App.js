@@ -90,36 +90,28 @@ function App() {
       return;
     }
 
-    const monthlyPaymentNum = parseFloat(monthlyPayment);
-    const absentDaysNum = parseInt(absentDays) || 0;
-    const advanceTakenNum = parseFloat(advanceTaken) || 0;
-    const previousBalanceNum = parseFloat(previousBalance) || 0;
-
-    // Calculate days in the payment period
-    const millisecondsPerDay = 24 * 60 * 60 * 1000;
-    const totalDays = Math.round((paymentDateObj - joinDateObj) / millisecondsPerDay) + 1;
+    const totalDaysInMonth = 30; // Assuming 30 days per month for simplicity
 
     // Calculate days worked
-    const daysWorked = Math.max(0, totalDays - absentDaysNum);
+    const daysWorked = Math.max(0, Math.floor((paymentDateObj - joinDateObj) / (1000 * 60 * 60 * 24)) + 1 - (parseInt(absentDays) || 0));
 
     // Calculate gross payment
-    const grossPayment = (daysWorked / totalDays) * monthlyPaymentNum;
+    const grossPayment = (daysWorked / totalDaysInMonth) * (parseFloat(monthlyPayment) || 0);
 
-    // Calculate total payment due
-    const totalPaymentDue = grossPayment + previousBalanceNum;
+    // Add previous balance to gross payment
+    const totalPaymentDue = grossPayment + (parseFloat(previousBalance) || 0);
 
     // Calculate net payment after deducting advances
-    const netPayment = totalPaymentDue - advanceTakenNum;
+    const netPayment = totalPaymentDue - (parseFloat(advanceTaken) || 0);
 
     // Determine if there's any balance carried forward
     const balanceCarriedForward = netPayment < 0 ? Math.abs(netPayment) : 0;
-    const finalPayment = Math.max(0, netPayment);
 
     setPaymentSummary({
       name: employeeName,
       totalDue: totalPaymentDue,
-      advanceDeducted: advanceTakenNum,
-      finalPayment: finalPayment,
+      advanceDeducted: parseFloat(advanceTaken) || 0,
+      finalPayment: Math.max(0, netPayment),
       balanceCarriedForward: balanceCarriedForward
     });
     setShowSummary(true);
@@ -152,7 +144,7 @@ function App() {
       <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow-md">
         <div className="flex items-center justify-center space-x-2">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-gray-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 14h.01M9 11h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
           </svg>
           <h2 className="text-2xl font-bold text-gray-900 font-inter whitespace-nowrap">
             Employee Payment Calculator
