@@ -27,21 +27,11 @@ function InputField({ label, id, type, value, onChange, placeholder, step, min }
   );
 }
 
-function PaymentSummary({ name, totalDue, advanceDeducted, finalPayment, balanceCarriedForward, onReset, daysWorked, absentDays }) {
+function PaymentSummary({ name, totalDue, advanceDeducted, finalPayment, balanceCarriedForward, onReset, totalDays, workingDays, absentDays }) {
   return (
     <div className="bg-white shadow overflow-hidden sm:rounded-lg">
-      <div className="px-4 py-5 sm:px-6 flex justify-between items-center">
+      <div className="px-4 py-5 sm:px-6">
         <h3 className="text-lg leading-6 font-medium text-gray-900">Payment Summary for {name}</h3>
-        <div className="flex space-x-2">
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-            {daysWorked} Working Days
-          </span>
-          {absentDays > 0 && (
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-              {absentDays} Absent Days
-            </span>
-          )}
-        </div>
       </div>
       <div className="border-t border-gray-200">
         <dl>
@@ -49,11 +39,24 @@ function PaymentSummary({ name, totalDue, advanceDeducted, finalPayment, balance
           <SummaryItem label="Advance Deducted" value={`-₹ ${advanceDeducted.toFixed(2)}`} isNegative />
           <SummaryItem label="Final Payment" value={`₹ ${finalPayment.toFixed(2)}`} highlight />
           {balanceCarriedForward > 0 && (
-            <SummaryItem label="Balance Carried Forward" value={` ${balanceCarriedForward.toFixed(2)}`} isNegative />
+            <SummaryItem label="Balance Carried Forward" value={`₹ ${balanceCarriedForward.toFixed(2)}`} isNegative />
           )}
         </dl>
       </div>
-      <div className="px-4 py-3 bg-gray-50 text-right sm:px-6">
+      <div className="px-4 py-3 bg-gray-50 flex justify-between items-center">
+        <div className="flex space-x-2">
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+            Total Days: {totalDays}
+          </span>
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+            Working Days: {workingDays}
+          </span>
+          {absentDays > 0 && (
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+              Absent Days: {absentDays}
+            </span>
+          )}
+        </div>
         <button
           onClick={onReset}
           className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
@@ -110,10 +113,10 @@ function App() {
     const absentDaysCount = parseInt(absentDays) || 0;
 
     // Calculate working days
-    const daysWorked = totalDays - absentDaysCount;
+    const workingDays = totalDays - absentDaysCount;
 
     // Calculate gross payment
-    const grossPayment = (daysWorked / totalDaysInMonth) * (parseFloat(monthlyPayment) || 0);
+    const grossPayment = (workingDays / totalDaysInMonth) * (parseFloat(monthlyPayment) || 0);
 
     // Add previous balance to gross payment
     const totalPaymentDue = grossPayment + (parseFloat(previousBalance) || 0);
@@ -130,7 +133,8 @@ function App() {
       advanceDeducted: parseFloat(advanceTaken) || 0,
       finalPayment: Math.max(0, netPayment),
       balanceCarriedForward: balanceCarriedForward,
-      daysWorked: daysWorked,
+      totalDays: totalDays,
+      workingDays: workingDays,
       absentDays: absentDaysCount
     });
     setShowSummary(true);
