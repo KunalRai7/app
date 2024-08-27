@@ -27,11 +27,14 @@ function InputField({ label, id, type, value, onChange, placeholder, step, min }
   );
 }
 
-function PaymentSummary({ name, totalDue, advanceDeducted, finalPayment, balanceCarriedForward, onReset }) {
+function PaymentSummary({ name, totalDue, advanceDeducted, finalPayment, balanceCarriedForward, onReset, daysWorked }) {
   return (
     <div className="bg-white shadow overflow-hidden sm:rounded-lg">
-      <div className="px-4 py-5 sm:px-6">
+      <div className="px-4 py-5 sm:px-6 flex justify-between items-center">
         <h3 className="text-lg leading-6 font-medium text-gray-900">Payment Summary for {name}</h3>
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+          {daysWorked} Days
+        </span>
       </div>
       <div className="border-t border-gray-200">
         <dl>
@@ -113,7 +116,8 @@ function App() {
       totalDue: totalPaymentDue,
       advanceDeducted: parseFloat(advanceTaken) || 0,
       finalPayment: Math.max(0, netPayment),
-      balanceCarriedForward: balanceCarriedForward
+      balanceCarriedForward: balanceCarriedForward,
+      daysWorked: daysWorked
     });
     setShowSummary(true);
   };
