@@ -43,23 +43,21 @@ function PaymentSummary({ name, totalDue, advanceDeducted, finalPayment, balance
           )}
         </dl>
       </div>
-      <div className="px-4 py-3 bg-gray-50 flex justify-between items-center">
-        <div className="flex space-x-2">
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-            Total Days: {totalDays}
+      <div className="px-4 py-3 bg-gray-50 flex flex-col items-start space-y-2">
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+          Total Days: {totalDays}
+        </span>
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+          Working Days: {workingDays}
+        </span>
+        {absentDays > 0 && (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+            Absent Days: {absentDays}
           </span>
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-            Working Days: {workingDays}
-          </span>
-          {absentDays > 0 && (
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-              Absent Days: {absentDays}
-            </span>
-          )}
-        </div>
+        )}
         <button
           onClick={onReset}
-          className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          className="mt-4 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
         >
           « Calculate Another Payment
         </button>
