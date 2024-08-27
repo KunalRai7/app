@@ -4,7 +4,7 @@ import './index.css'; // Make sure Tailwind CSS is imported
 function InputField({ label, id, type, value, onChange, placeholder, step, min }) {
   return (
     <div>
-      <label htmlFor={id} className="block text-sm font-medium text-gray-700">
+      <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-1">
         {label}
       </label>
       <div className="mt-1">
@@ -20,6 +20,7 @@ function InputField({ label, id, type, value, onChange, placeholder, step, min }
           onClick={(e) => e.target.value = ''}
           step={step}
           min={min}
+          style={{ colorScheme: 'light' }}
         />
       </div>
     </div>
@@ -38,7 +39,7 @@ function PaymentSummary({ name, totalDue, advanceDeducted, finalPayment, balance
           <SummaryItem label="Advance Deducted" value={`-₹ ${advanceDeducted.toFixed(2)}`} isNegative />
           <SummaryItem label="Final Payment" value={`₹ ${finalPayment.toFixed(2)}`} highlight />
           {balanceCarriedForward > 0 && (
-            <SummaryItem label="Balance Carried Forward" value={`₹ ${balanceCarriedForward.toFixed(2)}`} isNegative />
+            <SummaryItem label="Balance Carried Forward" value={` ${balanceCarriedForward.toFixed(2)}`} isNegative />
           )}
         </dl>
       </div>
@@ -140,13 +141,13 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow-md">
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center py-6 px-4 sm:py-12 sm:px-6 lg:px-8">
+      <div className="w-full max-w-md space-y-8 bg-white p-4 sm:p-8 rounded-lg shadow-md">
         <div className="flex items-center justify-center space-x-2">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-gray-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 sm:h-8 sm:w-8 text-gray-900 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
           </svg>
-          <h2 className="text-2xl font-bold text-gray-900 font-inter whitespace-nowrap">
+          <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-gray-900 font-inter whitespace-nowrap">
             Employee Payment Calculator
           </h2>
         </div>
